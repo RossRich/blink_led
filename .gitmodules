@@ -1,0 +1,8 @@
+[submodule "RF24"]
+	path = libs/RF24
+	url = https://github.com/nRF24/RF24.git
+	branch = master
+[submodule "libs/mavlink2"]
+	path = libs/mavlink2
+	url = https://github.com/mavlink/c_library_v2.git
+	branch = master
