@@ -4,7 +4,7 @@
 #include "hardware/i2c.h"
 // #include "pico/binary_info.h"
 #include "pico/stdlib.h"
-#include "raspberry26x32.h"
+// #include "raspberry26x32.h"
 #include "ssd1306_font.h"
 #include <ctype.h>
 #include <stdio.h>

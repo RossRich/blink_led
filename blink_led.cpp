@@ -1,7 +1,5 @@
 #include "include/uav_monitor.hpp"
 #include "libs/RF24/RF24.h"
-#include "libs/RF24/examples_pico/defaultPins.h"
-#include "libs/c_library_v2/standard/mavlink.h"
 #include "pico/stdlib.h"
 #include "tusb.h"
 #include <stdio.h>
@@ -14,9 +12,9 @@ volatile bool timer_fired = false;
 
 uint radio_num = 1;
 
-mavlink_message_t msg;
-mavlink_heartbeat_t hb;
-mavlink_status_t status;
+// mavlink_message_t msg;
+// mavlink_heartbeat_t hb;
+// mavlink_status_t status;
 
 Monitor monitor;
 
@@ -35,9 +33,9 @@ int main() {
   }
   gpio_put(LED_PIN, 0);
 
-  mavlink_status_t status;
-  mavlink_message_t msg;
-  int chan = MAVLINK_COMM_0;
+  // mavlink_status_t status;
+  // mavlink_message_t msg;
+  // int chan = MAVLINK_COMM_0;
 
   while (true) {
     tight_loop_contents();

@@ -41,11 +41,11 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-set(SSD1306_I2C_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/libs/pico-examples/i2c)
+set(SSD1306_I2C_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/libs)
 
 # add_library(ssd1306 STATIC ${SSD1306_I2C_INCLUDE}/ssd1306_i2c/ssd1306_i2c.h)
 
-add_executable(blink_led blink_led.cpp ${SSD1306_I2C_INCLUDE}/ssd1306_i2c/ssd1306_i2c.h)
+add_executable(blink_led blink_led.cpp ${SSD1306_I2C_INCLUDE}/ssd1306_i2c.h)
 
 pico_set_program_name(blink_led "blink_led")
 pico_set_program_version(blink_led "0.1")

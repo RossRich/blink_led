@@ -1,8 +1,13 @@
+#if !defined(__VIEW_H__)
+#define __VIEW_H__
+
+#include "hardware/structs/rosc.h"
+#include "observer.hpp"
 #include "pico/stdlib.h"
 #include "ssd1306_i2c.h"
-#include "observer.hpp"
+#include <string>
 
-class View:  public Subscriber{
+class View : public Subscriber {
 private:
   struct render_area frame_area = {
     start_col : 0,
@@ -34,6 +39,8 @@ public:
     // zero the entire display
     memset(buf, 0, SSD1306_BUF_LEN);
     render(buf, &frame_area);
+    SSD1306_send_cmd(
+        SSD1306_SET_ENTIRE_ON); // go back to following RAM for pixel state
 
     // intro sequence: flash the screen 3 times
     // for (int i = 0; i < 3; i++) {
@@ -45,9 +52,24 @@ public:
     // }
   }
 
-  void update_counter(size_t val) {
+  void update() override {
 
-    WriteString(buf, 5, 0, )
   }
 
+  void update_counter(size_t val) {
+    char *test[] = {"1,2,3,        ", "3,2,1"};
+    itoa(int(val), test[0], 10);
+    int len = sprintf(test[0], "counter:%d", val);
+
+    printf("counter: %d\n", len);
+
+    int y = 0;
+    for (int i = 0; i < count_of(test); i++) {
+      WriteString(buf, 5, y, test[0]);
+      y += 8;
+    }
+    render(buf, &frame_area);
+  }
 };
+
+#endif // __VIEW_H__

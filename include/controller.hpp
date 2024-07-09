@@ -16,7 +16,7 @@ bool radio_callback(struct repeating_timer *t) {
     return true;
   // gpio_put(LED_PIN, 1);
 
-  printf("radio read");
+  printf("radio read\n");
 
   Radio *r = static_cast<Radio *>(t->user_data);
   r->try_read();
@@ -45,13 +45,13 @@ private:
 
 public:
   Controller() = delete;
-  Controller(Model *model, View *view) : _model(model), _view(view) {
+  Controller(Model *model, View *view) : Subscriber(), _model(model), _view(view) {
     _radio = new Radio();
-    _radio->add(*this);
+    _radio->add(this);
     add_repeating_timer_ms(RADIO_RATE * 1000, radio_callback,
                            static_cast<void *>(_radio), &radio_timer);
   }
-  ~Controller() {}
+  virtual ~Controller() {}
 
   bool init() {
     is_radio_ok = _radio->init();

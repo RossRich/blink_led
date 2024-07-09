@@ -20,7 +20,7 @@ private:
 
 public:
   Radio() { _radio = new RF24(CE_PIN, CSN_PIN); }
-  ~Radio() { delete _radio; }
+  virtual ~Radio() { delete _radio; }
 
   bool init() {
     if (!_radio->begin())

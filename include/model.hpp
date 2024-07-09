@@ -1,7 +1,7 @@
 #if !defined(__MODEL_H__)
 #define __MODEL_H__
 
-#include "libs/c_library_v2/minimal/mavlink.h"
+#include "libs/mavlink2/minimal/mavlink.h"
 #include "observer.hpp"
 
 class Model : public Publisher, Subscriber {
