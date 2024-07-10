@@ -14,9 +14,8 @@ private:
 
 public:
   Monitor() {
-
-    _view = new View();
     _model = new Model();
+    _view = new View(_model);
     _controller = new Controller(_model, _view);
   }
   ~Monitor() {}
