@@ -21,13 +21,13 @@ public:
 
   void on_start() {
     printf("On start screen\n");
-    // _driver->write_str(5, 0, "OnStart\0");
+    _driver->write_str(5, 0, "OnStart");
   }
 
   void update() {
-    // char buf_text[20];
-    // int len = sprintf(buf_text, "counter:%d", _model->get_counter());
-    // _driver->write_str(5, 0, buf_text);
+    char buf_text[20];
+    int len = sprintf(buf_text, "counter:%d", _model->get_counter());
+    _driver->write_str(5, 0, buf_text);
     printf("update screen\n");
   }
 };

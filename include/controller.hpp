@@ -52,9 +52,9 @@ public:
   void update() override {
     led_status = !led_status;
     gpio_put(LED_PIN, int(led_status));
-    // if (mav_helper->parse_buf(_radio->buffer, 32)) {
-      // _view->update();
-    // }
+    if (mav_helper->parse_buf(_radio->buffer, 32)) {
+      _view->update();
+    }
   }
 };
 
