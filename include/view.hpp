@@ -57,17 +57,9 @@ public:
   }
 
   void update_counter(size_t val) {
-    char *test[] = {"1,2,3,        ", "3,2,1"};
-    itoa(int(val), test[0], 10);
-    int len = sprintf(test[0], "counter:%d", val);
-
-    printf("counter: %d\n", len);
-
-    int y = 0;
-    for (int i = 0; i < count_of(test); i++) {
-      WriteString(buf, 5, y, test[0]);
-      y += 8;
-    }
+    char buf_text[20];
+    int len = sprintf(buf_text, "counter:%d", val);
+    WriteString(buf, 5, 0, buf_text);
     render(buf, &frame_area);
   }
 };

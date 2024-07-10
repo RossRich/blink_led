@@ -15,22 +15,8 @@ bool radio_callback(struct repeating_timer *t) {
   if (not is_radio_ok)
     return true;
   // gpio_put(LED_PIN, 1);
-
-  printf("radio read\n");
-
   Radio *r = static_cast<Radio *>(t->user_data);
   r->try_read();
-  // if (is_data_ok) {
-  //   for (uint8_t i = 0; i < radio.getPayloadSize(); ++i) {
-  //     if (mavlink_parse_char(chan, buffer[i], &msg, &status)) {
-  //       if (msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
-  //         printf("MSG ok");
-  //       }
-  //     }
-  //   }
-  //   is_data_ok = false;
-  // }
-  // to make this example readable in the serial terminal
   // gpio_put(LED_PIN, 0);
 
   return true;
@@ -62,6 +48,10 @@ public:
 
   void update() override { 
     _view->update_counter(_model->inc_counter());
+  }
+
+  void parse_msg() {
+
   }
 };
 
