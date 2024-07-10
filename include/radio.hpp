@@ -2,8 +2,8 @@
 #define __RADIO_H__
 
 #include "libs/RF24/RF24.h"
-#include <pico/stdlib.h>
 #include "observer.hpp"
+#include <pico/stdlib.h>
 
 #define CE_PIN 22
 #define CSN_PIN 17
@@ -13,12 +13,13 @@
 
 uint8_t address[][6] = {"1Node", "2Node"};
 
-class Radio: public Publisher {
+class Radio : public Publisher {
 private:
-  uint8_t _buffer[RADIO_BUFFER_SIZE];
   RF24 *_radio;
 
 public:
+  uint8_t buffer[RADIO_BUFFER_SIZE];
+
   Radio() { _radio = new RF24(CE_PIN, CSN_PIN); }
   virtual ~Radio() { delete _radio; }
 
@@ -37,7 +38,7 @@ public:
 
   void try_read() {
     if (_radio->available()) {
-      _radio->read(_buffer, _radio->getPayloadSize());
+      _radio->read(buffer, _radio->getPayloadSize());
       notify();
     }
   }
