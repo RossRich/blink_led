@@ -50,5 +50,6 @@
         "memory": "cpp",
         "*.tcc": "cpp"
     },
-    "C_Cpp.default.compilerPath": "/opt/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc"
+    "C_Cpp.default.compilerPath": "/opt/gcc-arm-none-eabi-9-2020-q2-update/bin/arm-none-eabi-gcc",
+    "C_Cpp.clang_format_fallbackStyle": "{BasedOnStyle: LLVM, ColumnLimit: 130, IndentWidth: 2, TabWidth: 2, AlignTrailingComments: true, AlwaysBreakTemplateDeclarations: Yes}"
 }

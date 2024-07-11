@@ -19,7 +19,7 @@ public:
   Publisher() {}
   virtual ~Publisher() {}
 
-  void add(Subscriber *sub) {
+  void add_sub(Subscriber *sub) {
     if (subs_num > 2)
       return;
 
