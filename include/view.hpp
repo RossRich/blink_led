@@ -22,7 +22,12 @@ private:
       gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
     }
 
-    void _init_ssd1306() { SSD1306_init(); }
+    void _init_ssd1306() {
+      SSD1306_init();
+      // SSD1306_send_cmd(SSD1306_SET_ALL_ON); // Set all pixels on
+      // sleep_ms(250);
+      // SSD1306_send_cmd(SSD1306_SET_ENTIRE_ON); // go back to following RAM for pixel state
+    }
 
   public:
     Driver() {
@@ -32,16 +37,24 @@ private:
     }
     ~Driver() override {}
 
-    struct render_area frame_area =
-        {start_col : 0, end_col : SSD1306_WIDTH - 1, start_page : 0, end_page : SSD1306_NUM_PAGES - 1};
+    void clear() {
+      struct render_area rd;
+      rd.start_col = 0;
+      rd.end_col = SSD1306_WIDTH - 1;
+      rd.start_page = 0;
+      rd.end_page = SSD1306_NUM_PAGES - 1;
+      calc_render_area_buflen(&rd);
+      memset(_buffer, 0, SSD1306_BUF_LEN);
+      render(_buffer, &rd);
+    }
 
-    void write_str(int16_t x, int16_t y, char *str) override {
-      calc_render_area_buflen(&frame_area);
+    void write_str(int16_t x, int16_t y, char *str, render_area &frame) override {
       WriteString(_buffer, x, y, str);
-      render(_buffer, &frame_area);
+      calc_render_area_buflen(&frame);
+      render(_buffer, &frame);
     };
-    void write_char(int16_t x, int16_t y, uint8_t ch) override{};
-  } * _driver;
+    void write_char(int16_t x, int16_t y, uint8_t ch, struct render_area &frame) override {};
+  } *_driver;
 
   Screen *_first;
   Screen *_visible;
@@ -51,6 +64,7 @@ public:
   View(Model *model) : _model(model) {
     _driver = new Driver();
     _first = new Screen(_driver, model);
+    _driver->clear();
     _visible = _first;
     _visible->on_start();
   }
