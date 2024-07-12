@@ -48,12 +48,12 @@ private:
       render(_buffer, &rd);
     }
 
-    void write_str(int16_t x, int16_t y, char *str, render_area &frame) override {
+    void write_str(int16_t x, int16_t y, const char *str, render_area &frame) override {
       WriteString(_buffer, x, y, str);
       calc_render_area_buflen(&frame);
       render(_buffer, &frame);
     };
-    void write_char(int16_t x, int16_t y, uint8_t ch, struct render_area &frame) override {};
+    void write_char(int16_t x, int16_t y, const uint8_t ch, struct render_area &frame) override {};
   } *_driver;
 
   Screen *_first;

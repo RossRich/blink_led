@@ -8,10 +8,11 @@
 #define CE_PIN 22
 #define CSN_PIN 17
 #define IRQ_PIN 6
-#define RADIO_CHANNEL 120
+#define RADIO_CHANNEL 92
 #define RADIO_BUFFER_SIZE 64
 
-uint8_t address[][6] = {"1Node", "2Node"};
+uint8_t address[][6] = {"1Node", "2Node", "3Node", "4Node"};
+const int radio_num = 0;
 
 class Radio : public Publisher {
 private:
@@ -27,10 +28,17 @@ public:
     if (!_radio->begin())
       return false;
 
-    _radio->setPALevel(RF24_PA_MIN);
+    _radio->setDataRate(RF24_1MBPS);
+    _radio->enableDynamicAck();
+    _radio->setPALevel(RF24_PA_LOW);
     _radio->setChannel(RADIO_CHANNEL);
-    _radio->openWritingPipe(address[0]);
-    _radio->openReadingPipe(1, address[1]);
+    _radio->setAutoAck(true);
+    _radio->openWritingPipe(address[radio_num]);
+
+    for (size_t i = 1; i < 4; ++i) {
+      _radio->openReadingPipe(i-1, address[i]);
+    }
+    
     _radio->startListening();
 
     return true;

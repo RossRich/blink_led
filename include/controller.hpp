@@ -1,7 +1,7 @@
 #if !defined(__CONTROLLER_H__)
 #define __CONTROLLER_H__
 
-#define RADIO_RATE 1 //< Hz
+#define RADIO_RATE 60 //< Hz
 
 #include "mavlink_helper.hpp"
 #include "model.hpp"
@@ -12,6 +12,7 @@
 #include <functional>
 
 const uint LED_PIN = PICO_DEFAULT_LED_PIN;
+const uint radio_rate_ms = uint((1.0f / RADIO_RATE) * 1000);
 volatile bool is_radio_ok = false;
 volatile bool led_status = false;
 
@@ -21,7 +22,6 @@ bool radio_callback(struct repeating_timer *t) {
 
   Radio *r = static_cast<Radio *>(t->user_data);
   r->try_read();
-  // gpio_put(LED_PIN, 0);
 
   return true;
 }
@@ -39,7 +39,7 @@ public:
     mav_helper = new MavlinkHelper(model);
     _radio = new Radio();
     _radio->add_sub(this);
-    add_repeating_timer_ms(RADIO_RATE * 1000, radio_callback, static_cast<void *>(_radio), &radio_timer);
+    add_repeating_timer_ms(radio_rate_ms, radio_callback, static_cast<void *>(_radio), &radio_timer);
   }
   virtual ~Controller() {}
 
@@ -52,6 +52,7 @@ public:
   void update() override {
     led_status = !led_status;
     gpio_put(LED_PIN, int(led_status));
+
     if (mav_helper->parse_buf(_radio->buffer, 32)) {
       _view->update();
     }

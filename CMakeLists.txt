@@ -34,7 +34,7 @@ if (PICO_SDK_VERSION_STRING VERSION_LESS "1.4.0")
   message(FATAL_ERROR "Raspberry Pi Pico SDK version 1.4.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
 endif()
 
-project(blink_led C CXX ASM)
+project(uav_monitor C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
@@ -45,19 +45,19 @@ set(SSD1306_I2C_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/libs)
 
 # add_library(ssd1306 STATIC ${SSD1306_I2C_INCLUDE}/ssd1306_i2c/ssd1306_i2c.h)
 
-add_executable(blink_led blink_led.cpp ${SSD1306_I2C_INCLUDE}/ssd1306_i2c.h)
+add_executable(uav_monitor uav_monitor.cpp ${SSD1306_I2C_INCLUDE}/ssd1306_i2c.h)
 
-pico_set_program_name(blink_led "blink_led")
-pico_set_program_version(blink_led "0.1")
+pico_set_program_name(uav_monitor "uav_monitor")
+pico_set_program_version(uav_monitor "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(blink_led 0)
-pico_enable_stdio_usb(blink_led 1)
+pico_enable_stdio_uart(uav_monitor 0)
+pico_enable_stdio_usb(uav_monitor 1)
 # Add the standard library to the build
 
 
 
-target_link_libraries(blink_led
+target_link_libraries(uav_monitor
         pico_stdlib
         hardware_spi
         hardware_i2c
@@ -65,12 +65,12 @@ target_link_libraries(blink_led
         )
 
 # Add the standard include files to the build
-target_include_directories(blink_led PRIVATE
+target_include_directories(uav_monitor PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}
   ${CMAKE_CURRENT_LIST_DIR}/.. # for our common lwipopts or any other standard includes, if required
   ${CMAKE_CURRENT_LIST_DIR}/include
   ${SSD1306_I2C_INCLUDE}
 )
 
-pico_add_extra_outputs(blink_led)
+pico_add_extra_outputs(uav_monitor)
 

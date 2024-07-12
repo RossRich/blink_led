@@ -3,6 +3,7 @@
 
 #include "libs/mavlink2/common/mavlink.h"
 #include "model.hpp"
+#include <pico/types.h>
 
 #define MAV_SYS_ID 10
 #define RADIO_CHAN MAVLINK_COMM_0
@@ -12,9 +13,19 @@ private:
   Model *_model;
 
   void _decode_msg(mavlink_message_t &mgs) {
-    if (msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
-      mavlink_msg_heartbeat_decode(&msg, &_model->msgs.heartbeat);
-      _model->inc_counter();
+    _model->add_sys_id(msg.sysid);
+    
+    if (msg.sysid < 3) {
+      auto &msg_cnt = _model->msg_container.at(msg.sysid);
+      msg_cnt.sys_id = msg.sysid;
+      if (msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
+        printf("NEW_MSG: SYS_ID - %d, MSG: %d\n", uint(msg.sysid), msg.msgid);
+        mavlink_msg_heartbeat_decode(&msg, &msg_cnt.heartbeat);
+        _model->inc_counter();
+        msg_cnt.is_updated = true;
+      }
+    } else {
+      printf("Bad sys_id: %d", uint(msg.sysid));
     }
   }
 
