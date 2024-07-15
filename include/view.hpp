@@ -5,7 +5,9 @@
 #include "model.hpp"
 #include "observer.hpp"
 #include "pico/stdlib.h"
-#include "screen.hpp"
+#include "screen/screen_base.hpp"
+#include "screen/start.hpp"
+#include "screen/well.hpp"
 #include "ssd1306_i2c.h"
 
 class View : public Subscriber {
@@ -26,7 +28,8 @@ private:
       SSD1306_init();
       // SSD1306_send_cmd(SSD1306_SET_ALL_ON); // Set all pixels on
       // sleep_ms(250);
-      // SSD1306_send_cmd(SSD1306_SET_ENTIRE_ON); // go back to following RAM for pixel state
+      // SSD1306_send_cmd(SSD1306_SET_ENTIRE_ON); // go back to following RAM
+      // for pixel state
     }
 
   public:
@@ -48,28 +51,42 @@ private:
       render(_buffer, &rd);
     }
 
-    void write_str(int16_t x, int16_t y, const char *str, render_area &frame) override {
+    void write_str(int16_t x, int16_t y, const char *str,
+                   render_area &frame) override {
       WriteString(_buffer, x, y, str);
       calc_render_area_buflen(&frame);
       render(_buffer, &frame);
     };
-    void write_char(int16_t x, int16_t y, const uint8_t ch, struct render_area &frame) override {};
-  } *_driver;
+    void write_char(int16_t x, int16_t y, const uint8_t ch,
+                    struct render_area &frame) override{};
+  } * _driver;
 
-  Screen *_first;
+  Screen *_start;
+  Screen *_well;
   Screen *_visible;
   Model *_model;
 
 public:
   View(Model *model) : _model(model) {
     _driver = new Driver();
-    _first = new Screen(_driver, model);
+    _start = new StartView(_driver, model);
+    _well = new WellView(_driver, model);
     _driver->clear();
-    _visible = _first;
+    _visible = _start;
     _visible->on_start();
   }
 
   ~View() {}
+
+  void well() {
+    _visible = _well;
+    _visible->on_start();
+  }
+
+  void start() {
+    _visible = _start;
+    _visible->on_start();
+  }
 
   void update() override { _visible->update(); }
 };
