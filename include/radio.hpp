@@ -20,6 +20,7 @@ private:
 
 public:
   uint8_t buffer[RADIO_BUFFER_SIZE];
+  uint8_t pa_size = 32;
 
   Radio() { _radio = new RF24(CE_PIN, CSN_PIN); }
   virtual ~Radio() { delete _radio; }
@@ -34,18 +35,19 @@ public:
     _radio->setChannel(RADIO_CHANNEL);
     _radio->setAutoAck(true);
     _radio->openWritingPipe(address[radio_num]);
+    pa_size = _radio->getPayloadSize();
 
     for (size_t i = 1; i < 4; ++i) {
-      _radio->openReadingPipe(i-1, address[i]);
+      _radio->openReadingPipe(i - 1, address[i]);
     }
-    
-    _radio->startListening();
 
+    _radio->startListening();
     return true;
   }
 
   void try_read() {
     if (_radio->available()) {
+      memset(buffer, 0, RADIO_BUFFER_SIZE);
       _radio->read(buffer, _radio->getPayloadSize());
       notify();
     }
