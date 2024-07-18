@@ -13,25 +13,14 @@
 #include <unordered_map>
 
 enum fsm_state_t { TRANSITION, START, WELL, ERROR };
-
 const uint LED_PIN = PICO_DEFAULT_LED_PIN;
 const uint radio_rate_ms = uint((1.0f / RADIO_RATE) * 1000);
 volatile bool is_radio_ok = false;
 volatile bool led_status = false;
-
-bool radio_callback(struct repeating_timer *t) {
-  if (not is_radio_ok)
-    return true;
-
-  Radio *r = static_cast<Radio *>(t->user_data);
-  r->try_read();
-
-  return true;
-}
+absolute_time_t rate_timer = get_absolute_time();
 
 class Controller : Subscriber {
 private:
-  struct repeating_timer radio_timer;
   Radio *_radio;
   Model *_model;
   View *_view;
@@ -68,7 +57,6 @@ private:
       break;
 
     default:
-
       break;
     }
   }
@@ -78,9 +66,6 @@ public:
     mav_helper = new MavlinkHelper(model);
     _radio = new Radio();
     _radio->add_sub(this);
-    add_repeating_timer_ms(radio_rate_ms, radio_callback,
-                           static_cast<void *>(_radio), &radio_timer);
-
     _states.insert(std::make_pair(fsm_state_t::START,
                                   std::bind(&Controller::start, this)));
     _states.insert(std::make_pair(fsm_state_t::ERROR,
@@ -92,55 +77,24 @@ public:
 
   bool init() {
     is_radio_ok = _radio->init();
+    if (is_radio_ok) {
+      transition(fsm_state_t::START);
+    }
+    _start_time = get_absolute_time();
     return is_radio_ok;
   }
 
-  void print_trottled(const char *msg) {
-    if (print_timer > get_absolute_time())
-      return;
-
-    printf(msg);
-
-    print_timer = make_timeout_time_ms(1000);
-  }
-
-  void start_enter() {
-    printf("start enter\n");
-    _view->start();
-    _start_time = make_timeout_time_ms(5000);
-  }
+  void start_enter() { _view->start(); }
 
   void start() {
-    if (_start_time < get_absolute_time()) {
+    if (_model->get_found().size()) {
       transition(fsm_state_t::WELL);
-      return;
-    }
-
-    char buf[50];
-    sprintf(
-        buf, "Next state after: %d\n",
-        int(us_to_ms(absolute_time_diff_us(get_absolute_time(), _start_time))) /
-            1000);
-    print_trottled(buf);
-  }
-
-  void well_enter() {
-    _view->well();
-    _start_time = make_timeout_time_ms(5000);
-    printf("well enter\n");
-  }
-  void well() {
-    if (_start_time > get_absolute_time()) {
-      char buf[50];
-      sprintf(buf, "Next state after: %d\n",
-              uint(us_to_ms(
-                  absolute_time_diff_us(get_absolute_time(), _start_time))) /
-                  1000);
-      print_trottled(buf);
-    } else {
-      transition(fsm_state_t::START);
     }
   }
+
+  void well_enter() { _view->well(); }
+
+  void well() {}
 
   void error() {}
 
@@ -148,25 +102,32 @@ public:
     if (current_state == fsm_state_t::TRANSITION)
       return;
 
-    if (fsm_loop != nullptr)
+    if (fsm_loop)
       fsm_loop();
   }
 
   // update from radio
   void update() override {
-    if (is_nil_time(_start_time)) {
-      transition(fsm_state_t::START);
+    if (mav_helper->parse_buf(_radio->buffer, _radio->pa_size)) {
+      led_status = !led_status;
+      gpio_put(LED_PIN, int(led_status));
     }
+  }
 
-    led_status = !led_status;
-    gpio_put(LED_PIN, int(led_status));
+  void run() {
+    if (not time_reached(_start_time))
+      return;
 
+    _start_time = make_timeout_time_ms(radio_rate_ms);
+
+    // printf("Controller rate: %u\n",
+    //        1000 / us_to_ms(
+    //                   absolute_time_diff_us(rate_timer,
+    //                   get_absolute_time())));
+    rate_timer = get_absolute_time();
+    _radio->try_read();
     fsm_update();
     _view->update();
-
-    if (mav_helper->parse_buf(_radio->buffer, 32)) {
-      // _view->update();
-    }
   }
 };
 

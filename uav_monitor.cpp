@@ -7,19 +7,26 @@
 #include "view.hpp"
 #include <stdio.h>
 
-View *_view;
-Model *_model;
-Controller *_controller;
+View *view;
+Model *model;
+Controller *controller;
 
 bool setup() {
-  _model = new Model();
-  _view = new View(_model);
-  _controller = new Controller(_model, _view);
-  return _controller->init();
+  model = new Model();
+  view = new View(model);
+  controller = new Controller(model, view);
+  return controller->init();
 }
 
 int main() {
   stdio_init_all();
+
+  i2c_init(i2c_default, SSD1306_I2C_CLK * 1000);
+  gpio_set_function(PICO_DEFAULT_I2C_SDA_PIN, GPIO_FUNC_I2C);
+  gpio_set_function(PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C);
+  gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
+  gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
+
   gpio_init(LED_PIN);
   gpio_set_dir(LED_PIN, GPIO_OUT);
 
@@ -31,7 +38,9 @@ int main() {
     sleep_ms(500);
   }
   gpio_put(LED_PIN, 0);
+
   while (true) {
-    tight_loop_contents();
+    controller->run();
+    // tight_loop_contents();
   }
 }

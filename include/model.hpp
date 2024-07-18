@@ -1,44 +1,50 @@
 #if !defined(__MODEL_H__)
 #define __MODEL_H__
 
+#define MAX_ISOTOPES 3u
+
+#include "isotope.hpp"
 #include "libs/mavlink2/minimal/mavlink.h"
 #include <array>
+#include <list>
 
 class Model {
 private:
-  size_t _msg_count = 0;
-  std::array<uint8_t, 10> sys_ids;
-  uint8_t ids_count = 0;
+  std::array<Isotope *, MAX_ISOTOPES> _isotopes_array = {nullptr};
+  std::list<uint8_t> sys_found;
+
+  inline size_t sys_id_to_idx(const uint8_t sys_id) const {
+    return sys_id - 1; //< sys_id начинаются с 1, а индексация массива с 0
+  }
 
 public:
-  struct mavlink_msgs {
-    uint8_t sys_id = 0;
-    bool is_updated = false;
-    mavlink_heartbeat_t heartbeat;
-  } msgs;
-
-  std::array<mavlink_msgs, 3> msg_container;
-
   Model() {}
-
   ~Model() {}
 
   bool init() { return true; }
 
-  void add_sys_id(uint8_t id) {
-    if (ids_count < sys_ids.max_size()) {
-      for (size_t i = 0; i < sys_ids.size(); ++i) {
-        if (sys_ids[i] == id)
-          break;
-      }
-      sys_ids[ids_count++] = id;
-    }
+  bool is_exist(const uint8_t sys_id) {
+    auto idx = sys_id_to_idx(sys_id);
+
+    if (_isotopes_array[idx])
+      return true;
+
+    return false;
   }
 
-  const uint8_t *get_sys_ids() { return sys_ids.data(); }
+  inline const std::list<uint8_t> &get_found() const { return sys_found; }
 
-  void inc_counter() { ++_msg_count; }
-  int get_counter() { return _msg_count; }
+  Isotope &get_isotope(const uint8_t sys_id) {
+    auto idx = sys_id_to_idx(sys_id);
+
+    if (not _isotopes_array[idx]) {
+      _isotopes_array[idx] =
+          new Isotope(sys_id, ISOTOPE_NAMES.get_name_by_id(sys_id));
+      sys_found.push_back(sys_id);
+    }
+
+    return *_isotopes_array[idx];
+  }
 };
 
 #endif // __MODEL_H__

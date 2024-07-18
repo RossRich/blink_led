@@ -200,22 +200,19 @@ void SSD1306_scroll(bool on) {
 }
 
 void send_buffer2(uint8_t buf[], render_area &ra) {
-
-  uint8_t *temp_buf = static_cast<uint8_t *>(malloc(ra.buflen + 1));
-
-  temp_buf[0] = 0x40;
-
-  size_t idx = (ra.start_page / 8) * 128 + ra.start_col;
-
-  memcpy(temp_buf + 1, buf + idx, ra.buflen);
-
-  i2c_write_blocking(i2c_default, SSD1306_I2C_ADDR, temp_buf, ra.buflen + 1,
-                     false);
-
-  free(temp_buf);
+  i2c_write_blocking(i2c_default, SSD1306_I2C_ADDR, buf, ra.buflen + 1, false);
 }
 
 void render(uint8_t *buf, struct render_area *area) {
+  // update a portion of the display with a render area
+  uint8_t cmds[] = {SSD1306_SET_COL_ADDR,  area->start_col,  area->end_col,
+                    SSD1306_SET_PAGE_ADDR, area->start_page, area->end_page};
+
+  SSD1306_send_cmd_list(cmds, count_of(cmds));
+  SSD1306_send_buf(buf, area->buflen);
+}
+
+void render2(uint8_t *buf, struct render_area *area) {
   // update a portion of the display with a render area
   uint8_t cmds[] = {SSD1306_SET_COL_ADDR,  area->start_col,  area->end_col,
                     SSD1306_SET_PAGE_ADDR, area->start_page, area->end_page};

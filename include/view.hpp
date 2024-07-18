@@ -24,13 +24,7 @@ private:
       gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
     }
 
-    void _init_ssd1306() {
-      SSD1306_init();
-      // SSD1306_send_cmd(SSD1306_SET_ALL_ON); // Set all pixels on
-      // sleep_ms(250);
-      // SSD1306_send_cmd(SSD1306_SET_ENTIRE_ON); // go back to following RAM
-      // for pixel state
-    }
+    void _init_ssd1306() { SSD1306_init(); }
 
   public:
     Driver() {
@@ -51,11 +45,27 @@ private:
       render(_buffer, &rd);
     }
 
-    void write_str(int16_t x, int16_t y, const char *str,
-                   render_area &frame) override {
+    void write_str(int16_t x, int16_t y, const char *str, render_area &frame) override {
       WriteString(_buffer, x, y, str);
-      calc_render_area_buflen(&frame);
-      render(_buffer, &frame);
+
+      render_area ra;
+      ra.start_col = x;
+      ra.end_col = strlen(str) * SSD1306_PAGE_HEIGHT + x;
+      ra.start_page = y / 8;
+      ra.end_page = y / 8;
+
+      calc_render_area_buflen(&ra);
+
+      uint8_t *temp_buf = static_cast<uint8_t *>(malloc(ra.buflen + 1));
+
+      temp_buf[0] = 0x40;
+
+      size_t idx = y / 8 * 128 + x;
+
+      memcpy(temp_buf + 1, _buffer + idx, ra.buflen);
+
+      render2(temp_buf, &ra);
+      free(temp_buf);
     };
     void write_char(int16_t x, int16_t y, const uint8_t ch,
                     struct render_area &frame) override{};
@@ -71,24 +81,29 @@ public:
     _driver = new Driver();
     _start = new StartView(_driver, model);
     _well = new WellView(_driver, model);
-    _driver->clear();
-    _visible = _start;
-    _visible->on_start();
+    start();
   }
 
   ~View() {}
 
   void well() {
+    _driver->clear();
     _visible = _well;
     _visible->on_start();
   }
 
   void start() {
+    _driver->clear();
     _visible = _start;
     _visible->on_start();
   }
 
-  void update() override { _visible->update(); }
+  void update() override {
+    if (not _visible) //< !!!!!!!
+      return;
+
+    _visible->draw();
+  }
 };
 
 #endif // __VIEW_H__

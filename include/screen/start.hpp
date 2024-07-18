@@ -5,21 +5,22 @@
 
 class StartView : public Screen {
 private:
-  uint counter = 0;
+  uint32_t _start_time;
 public:
   StartView(ScreenDriverI *driver, Model *model) : Screen(driver, model) {}
   virtual ~StartView() {}
 
   void on_start() override {
-    const char *test = "start on start";
-    write_str(test, 0, 4);
-    printf(test);
+    write_str_row("Isotope OS", 3, screen_align_t::CENTER);
+    _start_time = millis();
   }
 
-  void update() override {
-    sprintf(Screen::sb.str_buf, "start: %d  ", counter);
-    write_str(sb.str_buf, 0, 4);
-    counter += 5;
+  void on_draw() override {
+    auto sec = (millis() - _start_time) / 1000;
+    char *buf = Screen::sb.str_buf;
+    memset(buf, 0, 16);
+    sprintf(buf, "Loading %u", uint16_t(sec));
+    write_str_row(buf, 6, screen_align_t::CENTER);
   }
 };
 
