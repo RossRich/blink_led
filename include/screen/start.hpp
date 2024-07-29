@@ -7,7 +7,7 @@ class StartView : public Screen {
 private:
   uint32_t _start_time;
 public:
-  StartView(ScreenDriverI *driver, Model *model) : Screen(driver, model) {}
+  StartView(ScreenDriverI *driver) : Screen(driver) {}
   virtual ~StartView() {}
 
   void on_start() override {
