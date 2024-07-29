@@ -1,22 +1,7 @@
 #include "controller.hpp"
-#include "libs/RF24/RF24.h"
-#include "model.hpp"
 #include "pico/stdlib.h"
-#include "radio.hpp"
 #include "tusb.h"
-#include "view.hpp"
 #include <stdio.h>
-
-View *view;
-Model *model;
-Controller *controller;
-
-bool setup() {
-  model = new Model();
-  view = new View(model);
-  controller = new Controller(model, view);
-  return controller->init();
-}
 
 int main() {
   stdio_init_all();
@@ -28,9 +13,19 @@ int main() {
   gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
 
   gpio_init(LED_PIN);
+  gpio_init(ENC_SW);
+  gpio_init(ENC_CLK);
+  gpio_init(ENC_DT);
+
+  gpio_set_dir(ENC_SW, GPIO_IN);
+  gpio_set_dir(ENC_DT, GPIO_IN);
+  gpio_set_dir(ENC_CLK, GPIO_IN);
+  gpio_pull_up(ENC_SW);
+
   gpio_set_dir(LED_PIN, GPIO_OUT);
 
-  while (!setup()) {
+  Controller controller;
+  while (!controller.init()) {
     printf("Init failed");
     gpio_put(LED_PIN, 0);
     sleep_ms(500);
@@ -40,7 +35,6 @@ int main() {
   gpio_put(LED_PIN, 0);
 
   while (true) {
-    controller->run();
-    // tight_loop_contents();
+    controller.run();
   }
 }
