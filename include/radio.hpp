@@ -1,14 +1,14 @@
 #if !defined(__RADIO_H__)
 #define __RADIO_H__
 
-#include <functional>
 #include "libs/RF24/RF24.h"
+#include <functional>
 #include <pico/stdlib.h>
 
-#define CE_PIN 22
-#define CSN_PIN 17
-#define IRQ_PIN 6
-#define RADIO_CHANNEL 92
+#define CE_PIN            22
+#define CSN_PIN           17
+#define IRQ_PIN           6
+#define RADIO_CHANNEL     92
 #define RADIO_BUFFER_SIZE 32u * 6u * 3u
 
 uint8_t address[][6] = {"1Node", "2Node", "3Node", "4Node"};
@@ -29,8 +29,7 @@ public:
   virtual ~Radio() { delete _radio; }
 
   bool init() {
-    if (!_radio->begin())
-      return false;
+    if (!_radio->begin()) return false;
 
     _radio->setDataRate(RF24_1MBPS);
     _radio->setPALevel(RF24_PA_LOW);
@@ -48,19 +47,21 @@ public:
     return true;
   }
 
-  inline void add_read_callback(radio_callback_t fn) { _callback = std::move(fn); }
+  inline void add_read_callback(radio_callback_t fn) {
+    _callback = std::move(fn);
+  }
 
   void try_read() {
+    if (not _radio->available()) return;
+
     uint rx_bytes_num = 0;
     memset(buffer, 0, RADIO_BUFFER_SIZE);
     while (_radio->available() && rx_bytes_num < RADIO_BUFFER_SIZE) {
       _radio->read(buffer, pa_size);
       rx_bytes_num += pa_size;
     }
-    if (rx_bytes_num > 0 and _callback) {
-      _callback(buffer, rx_bytes_num);
-    }
 
+    if (rx_bytes_num > 0 and _callback) _callback(buffer, rx_bytes_num);
   }
 };
 

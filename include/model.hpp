@@ -38,8 +38,7 @@ public:
   bool is_exist(const uint8_t sys_id) {
     auto idx = sys_id_to_idx(sys_id);
 
-    if (_isotopes_array[idx])
-      return true;
+    if (_isotopes_array[idx]) return true;
 
     return false;
   }
@@ -62,13 +61,13 @@ public:
    * Имеется ли связь с каким либо устройством
    */
   bool is_connection_ok() {
-    if (not time_reached(_check_connection_timer))
-      return _is_con_ok;
+    if (not time_reached(_check_connection_timer)) return _is_con_ok;
 
     _is_con_ok = false;
     for (auto &sys_id : sys_found) {
       auto &isotope = get_isotope(sys_id);
-      // printf("Isotope #%u link: %u\n", uint(isotope.id()), uint(isotope.is_connection_ok()));
+      // printf("Isotope #%u link: %u\n", uint(isotope.id()),
+      // uint(isotope.is_connection_ok()));
       if (isotope.is_connection_ok()) {
         _is_con_ok = true;
         break;
@@ -87,8 +86,7 @@ class MavlinkHelper {
 private:
   Model *_model;
   void _decode_msg(mavlink_message_t &mgs) {
-    if (msg.sysid > 3 or msg.sysid < 1)
-      return;
+    if (msg.sysid > 3 or msg.sysid < 1) return;
 
     auto &isotope = _model->get_isotope(msg.sysid);
     isotope.update_time();
@@ -108,12 +106,12 @@ public:
 
   bool parse_buf(const uint8_t *buf, uint len) {
     bool res = false;
+    // printf("parse %u bytes\n", len);
     for (uint i = 0; i < len; ++i) {
-      if (mavlink_frame_char(MAVLINK_COMM_0, buf[i], &msg, &status)) {
+      if (mavlink_parse_char(MAVLINK_COMM_0, buf[i], &msg, &status)) {
         _decode_msg(msg);
         _model->msg_counter++;
-        if (_model->msg_counter >= 9999)
-          _model->msg_counter = 1;
+        if (_model->msg_counter >= 9999) _model->msg_counter = 1;
         res = true;
       }
     }

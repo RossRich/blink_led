@@ -3,15 +3,16 @@
 
 #include "screen_base.hpp"
 
-class StartView : public Screen {
+class StartView: public Screen {
 private:
   uint32_t _start_time;
+
 public:
   StartView(ScreenDriverI *driver) : Screen(driver) {}
   virtual ~StartView() {}
 
   void on_start() override {
-    write_str_row("Isotope OS", 3, screen_align_t::CENTER);
+    write_str_row("Isotope OS mic", 3, screen_align_t::CENTER);
     _start_time = millis();
   }
 

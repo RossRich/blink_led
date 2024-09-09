@@ -1,0 +1,16 @@
+---
+Language:      Cpp
+BasedOnStyle:  LLVM
+ColumnLimit: 80
+IndentWidth: 2
+TabWidth: 2
+AlignTrailingComments: true
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AlwaysBreakTemplateDeclarations: Yes
+AlignAfterOpenBracket: Align
+AlignConsecutiveMacros: true
+IndentPPDirectives: None
+SortUsingDeclarations: true
+SpaceBeforeInheritanceColon: false
+...
+
